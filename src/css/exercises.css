@@ -1,0 +1,57 @@
+.exercises-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 40px;
+  list-style: none;
+  padding: 0;
+}
+
+.exercise-category-card {
+  width: 100%;
+  height: 242px;
+  border-radius: 12px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-color: #242424;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.exercise-category-card:hover {
+  transform: scale(1.02);
+}
+
+.category-card-content {
+  text-align: center;
+  color: #ffffff;
+  pointer-events: none;
+}
+
+.category-name {
+  font-size: 24px;
+  font-weight: 500;
+  text-transform: capitalize;
+  margin-bottom: 4px;
+}
+
+.category-filter {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+@media screen and (min-width: 768px) {
+  .exercise-category-card {
+    width: calc((100% - 20px) / 2);
+  }
+}
+
+@media screen and (min-width: 1440px) {
+  .exercise-category-card {
+    width: calc((100% - 40px) / 3);
+  }
+}
