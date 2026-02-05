@@ -1,11 +1,12 @@
 {
-  "name": "vanilla-app-template",
+  "name": "goit-js-project",
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "homepage": "https://lnechiporenko-dotcom.github.io/goit-js-project/",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base=/vanilla-app-template/",
+    "build": "vite build --base=/goit-js-project/",
     "preview": "vite preview"
   },
   "devDependencies": {
