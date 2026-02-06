@@ -1,76 +1,61 @@
-const BASE_URL = 'https://your-energy.b.goit.study/api';
-let currentFilter = 'Muscles';
+const QUOTE_KEY = 'daily-quote';
 
-async function fetchQuote() {
-  const textElement = document.getElementById('quote-text');
-  const authorElement = document.getElementById('quote-author');
-  if (!textElement || !authorElement) return;
+// 1. Цитата дня (API + LocalStorage)
+async function getDailyQuote() {
+  const savedData = JSON.parse(localStorage.getItem(QUOTE_KEY));
+  const today = new Date().toLocaleDateString();
+
+  if (savedData && savedData.date === today) {
+    updateQuoteUI(savedData.quote, savedData.author);
+    return;
+  }
+
   try {
-    const response = await fetch(`${BASE_URL}/quote`);
+    const response = await fetch('https://your-energy.b.goit.study/api/quote');
     const data = await response.json();
-    textElement.textContent = data.quote;
-    authorElement.textContent = data.author || 'Anonymous';
-  } catch (err) { console.error(err); }
+    const quoteData = { quote: data.quote, author: data.author, date: today };
+    localStorage.setItem(QUOTE_KEY, JSON.stringify(quoteData));
+    updateQuoteUI(data.quote, data.author);
+  } catch (err) {
+    console.log("Помилка отримання цитати:", err);
+  }
 }
 
-async function renderCategories(filter = 'Muscles', page = 1) {
-  const container = document.getElementById('exercises-container');
+function updateQuoteUI(quote, author) {
+  const qText = document.querySelector('.quote-text');
+  const qAuthor = document.querySelector('.quote-author');
+  if (qText && qAuthor) {
+    qText.textContent = quote;
+    qAuthor.textContent = author;
+  }
+}
+
+async function getMusclesFilters() {
+  try {
+    const resp = await fetch('https://your-energy.b.goit.study/api/filters?filter=Muscles&page=1&limit=12');
+    const data = await resp.json();
+    renderFilters(data.results);
+  } catch (err) {
+    console.log("Помилка отримання фільтрів:", err);
+  }
+}
+
+function renderFilters(filters) {
+  const container = document.querySelector('.exercises-container'); 
   if (!container) return;
 
-  try {
-    const response = await fetch(`${BASE_URL}/filters?filter=${filter}&page=${page}&limit=12`);
-    const data = await response.json();
-    if (!data.results) return;
+  const markup = filters.map(item => `
+    <li class="filter-card" data-filter="${item.filter}" data-name="${item.name}" 
+        style="background: linear-gradient(0deg, rgba(16, 16, 16, 0.7), rgba(16, 16, 16, 0.7)), url('${item.imgUrl}'); background-size: cover;">
+      <div class="filter-card-content">
+        <p class="filter-card-name">${item.name.toUpperCase()}</p>
+        <p class="filter-card-type">${item.filter}</p>
+      </div>
+    </li>
+  `).join('');
 
-    const markup = data.results.map(item => {
-      let img = "https://cdn.pixabay.com/photo/2017/08/07/14/02/man-2604149_1280.jpg";
-      if (item.imgUrl) {
-        img = item.imgUrl.replace('http://', 'https://');
-      }
-
-      return `
-        <li class="exercise-category-card" 
-            style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('${img}'); 
-                   background-size: cover; background-position: center;">
-          <div class="category-card-content">
-            <p class="category-name">${item.name}</p>
-            <p class="category-filter">${item.filter}</p>
-          </div>
-        </li>`;
-    }).join('');
-
-    container.innerHTML = markup;
-    
-    renderPagination(data.totalPages, page);
-
-  } catch (err) { console.error(err); }
+  container.innerHTML = markup;
 }
 
-function renderPagination(totalPages, currentPage) {
-  const paginationContainer = document.getElementById('pagination');
-  if (!paginationContainer) return;
-  
-  let paginationMarkup = '';
-  for (let i = 1; i <= totalPages; i++) {
-    if (i > 5) break; 
-    paginationMarkup += `
-      <button class="pg-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>
-    `;
-  }
-  paginationContainer.innerHTML = paginationMarkup;
-}
-
-const filterList = document.querySelector('.exercises-filter-list');
-
-if (filterList) {
-  filterList.addEventListener('click', (event) => {
-    if (event.target.tagName !== 'BUTTON') return;
-
-    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-
-    const currentFilter = event.target.dataset.filter;
-
-    renderCategories(currentFilter);
-  });
-}
+getDailyQuote();
+getMusclesFilters();
